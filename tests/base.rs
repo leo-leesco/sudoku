@@ -1,3 +1,5 @@
+use sudoku::*;
+
 const VALID: Sudoku = sudoku![
     [5, 9, 7, 8, 3, 2, 1, 6, 4],
     [8, 2, 1, 4, 6, 9, 7, 3, 5],
@@ -10,7 +12,49 @@ const VALID: Sudoku = sudoku![
     [9, 4, 6, 1, 2, 7, 3, 5, 8]
 ];
 
+const WITH_HOLES: Sudoku = sudoku![
+    [5, 0, 0, 0, 0, 2, 1, 0, 4],
+    [8, 0, 0, 4, 0, 0, 0, 3, 0],
+    [3, 6, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 8, 3, 6, 0, 0],
+    [0, 8, 0, 0, 0, 0, 0, 9, 0],
+    [0, 0, 2, 9, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 2, 6],
+    [0, 3, 0, 0, 0, 4, 0, 0, 7],
+    [9, 0, 6, 1, 0, 0, 0, 0, 8]
+];
+
 #[test]
 fn extract_ligne() {
-    assert_eq!(result, 4);
+    assert_eq!(ligne(VALID, 0), ligne![5, 9, 7, 8, 3, 2, 1, 6, 4]);
+    assert_eq!(
+        ligne(WITH_HOLES, 0),
+        [
+            Some(5),
+            None,
+            None,
+            None,
+            None,
+            Some(2),
+            Some(1),
+            None,
+            Some(4)
+        ]
+    )
+}
+
+#[test]
+fn extract_colonne() {
+    assert_eq!(colonne(VALID, 0), ligne![5, 8, 3, 4, 1, 6, 7, 2, 9]);
+}
+
+#[test]
+fn extract_carre() {
+    assert_eq!(carre(VALID, 0, 0), sudoku![[5, 9, 7], [8, 2, 1], [3, 6, 4]]);
+}
+
+#[test]
+fn assert_valid() {
+    assert!(valid(VALID));
+    assert!(valid(WITH_HOLES));
 }
