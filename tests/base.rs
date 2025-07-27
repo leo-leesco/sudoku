@@ -24,6 +24,18 @@ const WITH_HOLES: Sudoku = sudoku![
     [9, 0, 6, 1, 0, 0, 0, 0, 8]
 ];
 
+const DEFAULT: Sudoku = sudoku![
+    [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    [2, 3, 4, 5, 6, 7, 8, 9, 1],
+    [3, 4, 5, 6, 7, 8, 9, 1, 2],
+    [4, 5, 6, 7, 8, 9, 1, 2, 3],
+    [5, 6, 7, 8, 9, 1, 2, 3, 4],
+    [6, 7, 8, 9, 1, 2, 3, 4, 5],
+    [7, 8, 9, 1, 2, 3, 4, 5, 6],
+    [8, 9, 1, 2, 3, 4, 5, 6, 7],
+    [9, 1, 2, 3, 4, 5, 6, 7, 8],
+];
+
 #[test]
 fn extract_ligne() {
     assert_eq!(ligne(VALID, 0), ligne![5, 9, 7, 8, 3, 2, 1, 6, 4]);
@@ -57,4 +69,9 @@ fn extract_carre() {
 fn assert_valid() {
     assert!(valid(VALID));
     assert!(valid(WITH_HOLES));
+}
+
+#[test]
+fn assert_invalid() {
+    assert!(!valid(DEFAULT))
 }
