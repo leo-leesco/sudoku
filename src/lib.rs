@@ -149,13 +149,14 @@ fn only_possible_slot(ligne: Ligne<bool>) -> Option<usize> {
 
 /// returns the updated grid and the number of new numbers added during this pass
 pub fn trivial_digit(mut grille: Sudoku<Option<u8>>, chiffre: u8) -> (Sudoku<Option<u8>>, usize) {
-    let mask = barre(grille, chiffre);
+    let mut mask = barre(grille, chiffre);
     let mut nb_updates = 0;
 
     for i in 0..SIZE {
         if let Some(j) = only_possible_slot(ligne(mask, i)) {
             if grille[i][j].is_none() {
                 nb_updates += 1;
+                mask = barre_ligne(mask, i);
                 grille[i][j] = Some(chiffre);
 
                 eprintln!("found {chiffre} in line at ({i},{j})")
@@ -167,6 +168,7 @@ pub fn trivial_digit(mut grille: Sudoku<Option<u8>>, chiffre: u8) -> (Sudoku<Opt
         if let Some(i) = only_possible_slot(colonne(mask, j)) {
             if grille[i][j].is_none() {
                 nb_updates += 1;
+                mask = barre_colonne(mask, j);
                 grille[i][j] = Some(chiffre);
 
                 eprintln!("found {chiffre} in column at ({i},{j})")
@@ -186,13 +188,14 @@ pub fn trivial_digit(mut grille: Sudoku<Option<u8>>, chiffre: u8) -> (Sudoku<Opt
                     .unwrap(),
             ) {
                 let (a, b) = (k / SQUARE_SIZE, k % SQUARE_SIZE);
-                let i = SQUARE_SIZE * i + a;
-                let j = SQUARE_SIZE * j + b;
-                if grille[i][j].is_none() {
+                let ip = SQUARE_SIZE * i + a;
+                let jp = SQUARE_SIZE * j + b;
+                if grille[ip][jp].is_none() {
                     nb_updates += 1;
-                    grille[i][j] = Some(chiffre);
+                    mask = barre_carre(mask, i, j);
+                    grille[ip][jp] = Some(chiffre);
 
-                    eprintln!("found {chiffre} in square at ({i},{j})")
+                    eprintln!("found {chiffre} in square at ({ip},{jp})")
                 }
             }
         }
