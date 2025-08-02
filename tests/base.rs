@@ -1,5 +1,18 @@
 use sudoku::*;
 
+fn from_sudoku(sudoku: Sudoku<Option<u8>>) -> Sudoku<u8> {
+    sudoku.map(|ligne| {
+        ligne.map(|v| {
+            if let Some(num) = v {
+                assert!(num <= SIZE as u8);
+                num
+            } else {
+                0
+            }
+        })
+    })
+}
+
 const VALID: Sudoku<Option<u8>> = sudoku![
     [5, 9, 7, 8, 3, 2, 1, 6, 4],
     [8, 2, 1, 4, 6, 9, 7, 3, 5],
@@ -115,106 +128,51 @@ fn test_barre() {
 }
 
 #[test]
-fn test_easy_one_step_trivial() {
-    assert_eq!(one_step_trivial(MISS_ONE), Ok(VALID))
+fn test_trivial_digit() {
+    assert_eq!(trivial_digit(MISS_ONE, 5), (VALID, 1));
+    assert_eq!(
+        trivial_digit(WITH_HOLES, 2),
+        (
+            sudoku![
+                [5, 0, 0, 0, 0, 2, 1, 0, 4],
+                [8, 2, 0, 4, 0, 0, 0, 3, 0],
+                [3, 6, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 8, 3, 6, 0, 0],
+                [0, 8, 0, 0, 0, 0, 0, 9, 0],
+                [0, 0, 2, 9, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 2, 6],
+                [2, 3, 0, 0, 0, 4, 0, 0, 7],
+                [9, 0, 6, 1, 0, 0, 0, 0, 8]
+            ],
+            2
+        )
+    )
 }
 
 #[test]
-fn test_one_step_trivial() {
+fn test_trivial() {
+    // assert_eq!(trivial(MISS_ONE), (VALID, 1));
+
+    let (with_holes_partial, updates) = trivial(WITH_HOLES);
     assert_eq!(
-        one_step_trivial(WITH_HOLES),
-        Ok([
-            [
-                Some(5),
-                None,
-                None,
-                None,
-                None,
-                Some(2),
-                Some(1),
-                Some(6),
-                Some(4)
+        (with_holes_partial, updates),
+        (
+            sudoku![
+                [5, 0, 0, 8, 0, 2, 1, 6, 4],
+                [8, 2, 0, 4, 0, 0, 0, 3, 0],
+                [3, 6, 4, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 8, 3, 6, 0, 0],
+                [0, 8, 3, 0, 4, 0, 0, 9, 0],
+                [0, 0, 2, 9, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 2, 6],
+                [2, 3, 0, 0, 0, 4, 0, 1, 7],
+                [9, 0, 6, 1, 0, 0, 0, 0, 8]
             ],
-            [
-                Some(8),
-                Some(2),
-                None,
-                Some(4),
-                None,
-                None,
-                None,
-                Some(3),
-                None
-            ],
-            [
-                Some(3),
-                Some(6),
-                Some(4),
-                None,
-                None,
-                None,
-                None,
-                None,
-                None
-            ],
-            [
-                None,
-                None,
-                None,
-                None,
-                Some(8),
-                Some(3),
-                Some(6),
-                None,
-                None
-            ],
-            [
-                None,
-                Some(8),
-                Some(3),
-                None,
-                Some(4),
-                None,
-                None,
-                Some(9),
-                None
-            ],
-            [
-                None,
-                None,
-                Some(2),
-                Some(9),
-                Some(1),
-                None,
-                None,
-                None,
-                None
-            ],
-            [None, None, None, None, None, None, None, Some(2), Some(6)],
-            [
-                None,
-                Some(3),
-                None,
-                None,
-                None,
-                Some(4),
-                None,
-                None,
-                Some(7)
-            ],
-            [
-                Some(9),
-                None,
-                Some(6),
-                Some(1),
-                None,
-                None,
-                None,
-                None,
-                Some(8)
-            ]
-        ])
+            8
+        ),
+        "got instead {:?}",
+        from_sudoku(trivial(WITH_HOLES).0)
     );
 
-    // println!("{:?}", one_step_trivial(WITH_HOLES))
+    // println!("{:?}", trivial(WITH_HOLES))
 }

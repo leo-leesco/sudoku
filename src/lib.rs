@@ -116,8 +116,10 @@ fn barre_carre(mut grille: Sudoku<bool>, i: usize, j: usize) -> Sudoku<bool> {
 }
 
 pub fn barre(grille: Sudoku<Option<u8>>, chiffre: u8) -> Sudoku<bool> {
-    let mut mask: Sudoku<bool> =
-        grille.map(|ligne| ligne.map(|v| if let Some(_) = v { false } else { true }));
+    let mut mask: Sudoku<bool> = grille.map(|ligne| ligne.map(|v| v.is_none())); // barre
+    // les chiffres déjà placés
+
+    // on barre les positions impossibles en plus
     for i in 0..SIZE {
         for j in 0..SIZE {
             if let Some(n) = grille[i][j] {
@@ -145,33 +147,37 @@ fn only_possible_slot(ligne: Ligne<bool>) -> Option<usize> {
     index // Either None (no true), or Some(index) if exactly one
 }
 
-pub fn one_step_trivial(mut grille: Sudoku<Option<u8>>) -> Result<Sudoku<Option<u8>>, ()> {
-    let mut mask: Sudoku<bool>;
-    let mut updated = false;
-    for chiffre in 1..=SIZE {
-        mask = barre(grille, chiffre as u8);
+/// returns the updated grid and the number of new numbers added during this pass
+pub fn trivial_digit(mut grille: Sudoku<Option<u8>>, chiffre: u8) -> (Sudoku<Option<u8>>, usize) {
+    let mask = barre(grille, chiffre);
+    let mut nb_updates = 0;
 
-        for i in 0..SIZE {
-            if let Some(j) = only_possible_slot(ligne(mask, i)) {
-                grille[i][j] = Some(chiffre as u8);
-                updated = true;
+    for i in 0..SIZE {
+        if let Some(j) = only_possible_slot(ligne(mask, i)) {
+            if grille[i][j].is_none() {
+                nb_updates += 1;
+                grille[i][j] = Some(chiffre);
 
-                if cfg!(test) {
-                    println!("added {chiffre} at ({i},{j})")
-                }
+                eprintln!("found {chiffre} in line at ({i},{j})")
             }
+        }
+    }
 
-            if let Some(j) = only_possible_slot(colonne(mask, i)) {
-                grille[j][i] = Some(chiffre as u8);
-                updated = true;
+    for j in 0..SIZE {
+        if let Some(i) = only_possible_slot(colonne(mask, j)) {
+            if grille[i][j].is_none() {
+                nb_updates += 1;
+                grille[i][j] = Some(chiffre);
 
-                if cfg!(test) {
-                    println!("added {chiffre} at ({i},{j})")
-                }
+                eprintln!("found {chiffre} in column at ({i},{j})")
             }
+        }
+    }
 
-            if let Some(j) = only_possible_slot(
-                carre(mask, i / SQUARE_SIZE, i % SQUARE_SIZE) // on lit de gauche à droite puis de haut en bas
+    for i in 0..SQUARE_SIZE {
+        for j in 0..SQUARE_SIZE {
+            if let Some(k) = only_possible_slot(
+                carre(mask, i, j)
                     .iter()
                     .flatten()
                     .copied()
@@ -179,14 +185,29 @@ pub fn one_step_trivial(mut grille: Sudoku<Option<u8>>) -> Result<Sudoku<Option<
                     .try_into()
                     .unwrap(),
             ) {
-                grille[j / SQUARE_SIZE][j % SQUARE_SIZE] = Some(chiffre as u8);
-                updated = true;
+                let (a, b) = (k / SQUARE_SIZE, k % SQUARE_SIZE);
+                let i = SQUARE_SIZE * i + a;
+                let j = SQUARE_SIZE * j + b;
+                if grille[i][j].is_none() {
+                    nb_updates += 1;
+                    grille[i][j] = Some(chiffre);
 
-                if cfg!(test) {
-                    println!("added {chiffre} in square {i} in position {j}")
+                    eprintln!("found {chiffre} in square at ({i},{j})")
                 }
             }
         }
     }
-    if updated { Ok(grille) } else { Err(()) }
+
+    (grille, nb_updates)
+}
+
+pub fn trivial(mut grille: Sudoku<Option<u8>>) -> (Sudoku<Option<u8>>, usize) {
+    let mut nb_updates = 0;
+    let mut added;
+    for chiffre in 1..=SIZE {
+        (grille, added) = trivial_digit(grille, chiffre as u8);
+        nb_updates += added;
+    }
+
+    (grille, nb_updates)
 }
