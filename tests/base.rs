@@ -144,8 +144,10 @@ fn test_trivial_digit() {
                 [2, 3, 0, 0, 0, 4, 0, 0, 7],
                 [9, 0, 6, 1, 0, 0, 0, 0, 8]
             ],
-            2
-        )
+            3
+        ),
+        "got instead {:?}",
+        from_sudoku(trivial_digit(WITH_HOLES, 2).0)
     )
 }
 
