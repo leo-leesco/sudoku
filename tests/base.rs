@@ -128,13 +128,19 @@ fn test_barre() {
 
 #[test]
 fn test_trivial_digit() {
-    assert_eq!(trivial_digit(MISS_ONE, 5), (VALID, 1));
+    assert_eq!(
+        trivial_digit(MISS_ONE, 5),
+        UpdatedGrid {
+            grid: VALID,
+            updates: 1
+        }
+    );
 
     assert!(valid(trivial_digit(WITH_HOLES, 2).0));
     assert_eq!(
         trivial_digit(WITH_HOLES, 2),
-        (
-            sudoku![
+        UpdatedGrid {
+            grid: sudoku![
                 [5, 0, 0, 0, 0, 2, 1, 0, 4],
                 [8, 2, 0, 4, 0, 0, 0, 3, 0],
                 [3, 6, 0, 0, 0, 0, 0, 0, 0],
@@ -145,18 +151,27 @@ fn test_trivial_digit() {
                 [2, 3, 0, 0, 0, 4, 0, 0, 7],
                 [9, 0, 6, 1, 2, 0, 0, 0, 8]
             ],
-            3
-        ),
+            updates: 3
+        },
         "got instead {:?}",
-        from_sudoku(trivial_digit(WITH_HOLES, 2).0)
+        from_sudoku(trivial_digit(WITH_HOLES, 2).grid)
     )
 }
 
 #[test]
 fn test_trivial() {
-    assert_eq!(trivial(MISS_ONE), (VALID, 1));
+    assert_eq!(
+        trivial(MISS_ONE),
+        UpdatedGrid {
+            grid: VALID,
+            updates: 1
+        }
+    );
 
-    let (with_holes_partial, updates) = trivial(WITH_HOLES);
+    let UpdatedGrid {
+        grid: with_holes_partial,
+        updates: updates,
+    } = trivial(WITH_HOLES);
     assert!(valid(with_holes_partial));
     assert_eq!(
         (with_holes_partial, updates),
@@ -175,6 +190,6 @@ fn test_trivial() {
             13
         ),
         "got instead {:?}",
-        from_sudoku(trivial(WITH_HOLES).0)
+        from_sudoku(trivial(WITH_HOLES).grid)
     );
 }
