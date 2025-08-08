@@ -124,12 +124,13 @@ fn test_barre() {
             [false, true, false, false, true, false, false, false, false]
         ]
     )
-    // println!("{:?}", barre(WITH_HOLES, 2)) // to get the output via `cargo test -- --nocapture`
 }
 
 #[test]
 fn test_trivial_digit() {
     assert_eq!(trivial_digit(MISS_ONE, 5), (VALID, 1));
+
+    assert!(valid(trivial_digit(WITH_HOLES, 2).0));
     assert_eq!(
         trivial_digit(WITH_HOLES, 2),
         (
@@ -142,7 +143,7 @@ fn test_trivial_digit() {
                 [0, 0, 2, 9, 1, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 2, 6],
                 [2, 3, 0, 0, 0, 4, 0, 0, 7],
-                [9, 0, 6, 1, 0, 0, 0, 0, 8]
+                [9, 0, 6, 1, 2, 0, 0, 0, 8]
             ],
             3
         ),
@@ -153,9 +154,10 @@ fn test_trivial_digit() {
 
 #[test]
 fn test_trivial() {
-    // assert_eq!(trivial(MISS_ONE), (VALID, 1));
+    assert_eq!(trivial(MISS_ONE), (VALID, 1));
 
     let (with_holes_partial, updates) = trivial(WITH_HOLES);
+    assert!(valid(with_holes_partial));
     assert_eq!(
         (with_holes_partial, updates),
         (
@@ -165,16 +167,14 @@ fn test_trivial() {
                 [3, 6, 4, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 8, 3, 6, 0, 0],
                 [0, 8, 3, 0, 4, 0, 0, 9, 0],
-                [0, 0, 2, 9, 1, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 2, 6],
-                [2, 3, 0, 0, 0, 4, 0, 1, 7],
-                [9, 0, 6, 1, 0, 0, 0, 0, 8]
+                [0, 0, 2, 9, 1, 0, 0, 0, 3],
+                [0, 0, 0, 0, 0, 8, 0, 2, 6],
+                [2, 3, 8, 0, 0, 4, 0, 1, 7],
+                [9, 0, 6, 1, 2, 0, 3, 0, 8]
             ],
-            8
+            13
         ),
         "got instead {:?}",
         from_sudoku(trivial(WITH_HOLES).0)
     );
-
-    // println!("{:?}", trivial(WITH_HOLES))
 }
